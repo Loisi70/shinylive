@@ -34,31 +34,31 @@ Here's a simple Shinylive app embedded in our document:
 #| viewerHeight: 400
 
 from shiny import App, ui, render
+import duckdb
+import pandas as pd
+
+# Create an in-memory DuckDB connection
+con = duckdb.connect(database=':memory:')
+
+# You could load data from a bundled CSV
+# con.execute("CREATE TABLE my_data AS SELECT * FROM read_csv('data.csv')")
+
+# For demo purposes, we'll create sample data
+con.execute("CREATE TABLE my_data AS SELECT * FROM (VALUES (1, 'A'), (2, 'B'), (3, 'C')) AS t(id, name)")
 
 app_ui = ui.page_fluid(
-    ui.h1("Hello Shinylive in Quarto!"),
-    ui.input_slider("n", "Number of observations", 10, 100, 50),
-    ui.output_text_verbatim("summary"),
-    ui.output_plot("histogram")
+    ui.h1("DuckDB in Shinylive"),
+    ui.output_table("data_table")
 )
 
 def server(input, output, session):
-    @render.text
-    def summary():
-        return f"You've selected {input.n()} observations"
-    
-    @render.plot
-    def histogram():
-        import numpy as np
-        import matplotlib.pyplot as plt
-        data = np.random.randn(input.n())
-        plt.hist(data, bins=15)
-        plt.title("Random Normal Distribution")
-        plt.xlabel("Value")
-        plt.ylabel("Frequency")
-        return plt
+    @render.table
+    def data_table():
+        # Query data from DuckDB
+        return con.execute("SELECT * FROM my_data").fetchdf()
 
 app = App(app_ui, server)
+
 ```
 
 ## Additional Examples
