@@ -1,0 +1,122 @@
+---
+title: "Shinylive App in Quarto"
+format: html
+filters:
+  - shinylive
+---
+
+## Introduction
+
+This document demonstrates how to embed a Shinylive application directly in a Quarto document. The Shiny app runs completely in the browser without requiring a Shiny server.
+
+## Installation Requirements
+
+Before you can use Shinylive with Quarto, you need to:
+
+1. Install Quarto: https://quarto.org/docs/get-started/
+2. Install the Shinylive extension for Quarto:
+   ```bash
+   quarto add quarto-ext/shinylive
+   ```
+3. Make sure you have Python installed with Shiny for Python:
+   ```bash
+   pip install shiny
+   ```
+
+## Example Shinylive App
+
+Here's a simple Shinylive app embedded in our document:
+
+```{shinylive-python}
+#| standalone: true
+#| components: [editor, viewer]
+#| layout: vertical
+#| viewerHeight: 400
+
+from shiny import App, ui, render
+
+app_ui = ui.page_fluid(
+    ui.h1("Hello Shinylive in Quarto!"),
+    ui.input_slider("n", "Number of observations", 10, 100, 50),
+    ui.output_text_verbatim("summary"),
+    ui.output_plot("histogram")
+)
+
+def server(input, output, session):
+    @render.text
+    def summary():
+        return f"You've selected {input.n()} observations"
+    
+    @render.plot
+    def histogram():
+        import numpy as np
+        import matplotlib.pyplot as plt
+        data = np.random.randn(input.n())
+        plt.hist(data, bins=15)
+        plt.title("Random Normal Distribution")
+        plt.xlabel("Value")
+        plt.ylabel("Frequency")
+        return plt
+
+app = App(app_ui, server)
+```
+
+## Additional Examples
+
+### A Simple Counter App
+
+Here's another simple example of a counter app:
+
+```{shinylive-python}
+#| standalone: true
+#| components: [editor, viewer]
+#| layout: horizontal
+#| viewerHeight: 300
+
+from shiny import App, ui, reactive
+
+app_ui = ui.page_fluid(
+    ui.h3("Simple Counter"),
+    ui.input_action_button("increment", "Increment"),
+    ui.p(),
+    ui.output_text("count_text")
+)
+
+def server(input, output, session):
+    count = reactive.value(0)
+    
+    @reactive.effect
+    def _():
+        if input.increment():
+            count.set(count() + 1)
+    
+    @output
+    @render.text
+    def count_text():
+        return f"Count: {count()}"
+
+app = App(app_ui, server)
+```
+
+## How It Works
+
+The Shinylive Quarto extension does the following:
+
+1. It takes your Python Shiny app code
+2. Compiles it to WebAssembly with Pyodide
+3. Renders it directly in the browser
+
+This means your readers can interact with the Shiny app without needing to install anything or connect to a Shiny server.
+
+## Options
+
+You can customize your Shinylive apps with various options:
+
+- `standalone: true|false` - Whether the app is standalone or shares the Python environment with other code chunks
+- `components: [editor, viewer]` - Which components to display
+- `layout: vertical|horizontal` - Whether to stack the editor and viewer vertically or horizontally
+- `viewerHeight: 400` - Height of the viewer in pixels
+
+## Deployment
+
+When you render your Quarto document, it will include all the necessary JavaScript and WebAssembly files to run your Shiny apps in the browser. You can deploy the rendered HTML document to any static web hosting service.

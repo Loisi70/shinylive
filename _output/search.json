@@ -1,0 +1,58 @@
+[
+  {
+    "objectID": "Shinylive.html",
+    "href": "Shinylive.html",
+    "title": "Shinylive App in Quarto",
+    "section": "",
+    "text": "This document demonstrates how to embed a Shinylive application directly in a Quarto document. The Shiny app runs completely in the browser without requiring a Shiny server."
+  },
+  {
+    "objectID": "Shinylive.html#introduction",
+    "href": "Shinylive.html#introduction",
+    "title": "Shinylive App in Quarto",
+    "section": "",
+    "text": "This document demonstrates how to embed a Shinylive application directly in a Quarto document. The Shiny app runs completely in the browser without requiring a Shiny server."
+  },
+  {
+    "objectID": "Shinylive.html#installation-requirements",
+    "href": "Shinylive.html#installation-requirements",
+    "title": "Shinylive App in Quarto",
+    "section": "Installation Requirements",
+    "text": "Installation Requirements\nBefore you can use Shinylive with Quarto, you need to:\n\nInstall Quarto: https://quarto.org/docs/get-started/\nInstall the Shinylive extension for Quarto:\nquarto add quarto-ext/shinylive\nMake sure you have Python installed with Shiny for Python:\npip install shiny"
+  },
+  {
+    "objectID": "Shinylive.html#example-shinylive-app",
+    "href": "Shinylive.html#example-shinylive-app",
+    "title": "Shinylive App in Quarto",
+    "section": "Example Shinylive App",
+    "text": "Example Shinylive App\nHere’s a simple Shinylive app embedded in our document:\n#| '!! shinylive warning !!': |\n#|   shinylive does not work in self-contained HTML documents.\n#|   Please set `embed-resources: false` in your metadata.\n#| standalone: true\n#| components: [editor, viewer]\n#| layout: vertical\n#| viewerHeight: 400\n\nfrom shiny import App, ui, render\n\napp_ui = ui.page_fluid(\n    ui.h1(\"Hello Shinylive in Quarto!\"),\n    ui.input_slider(\"n\", \"Number of observations\", 10, 100, 50),\n    ui.output_text_verbatim(\"summary\"),\n    ui.output_plot(\"histogram\")\n)\n\ndef server(input, output, session):\n    @render.text\n    def summary():\n        return f\"You've selected {input.n()} observations\"\n    \n    @render.plot\n    def histogram():\n        import numpy as np\n        import matplotlib.pyplot as plt\n        data = np.random.randn(input.n())\n        plt.hist(data, bins=15)\n        plt.title(\"Random Normal Distribution\")\n        plt.xlabel(\"Value\")\n        plt.ylabel(\"Frequency\")\n        return plt\n\napp = App(app_ui, server)"
+  },
+  {
+    "objectID": "Shinylive.html#additional-examples",
+    "href": "Shinylive.html#additional-examples",
+    "title": "Shinylive App in Quarto",
+    "section": "Additional Examples",
+    "text": "Additional Examples\n\nA Simple Counter App\nHere’s another simple example of a counter app:\n#| '!! shinylive warning !!': |\n#|   shinylive does not work in self-contained HTML documents.\n#|   Please set `embed-resources: false` in your metadata.\n#| standalone: true\n#| components: [editor, viewer]\n#| layout: horizontal\n#| viewerHeight: 300\n\nfrom shiny import App, ui, reactive\n\napp_ui = ui.page_fluid(\n    ui.h3(\"Simple Counter\"),\n    ui.input_action_button(\"increment\", \"Increment\"),\n    ui.p(),\n    ui.output_text(\"count_text\")\n)\n\ndef server(input, output, session):\n    count = reactive.value(0)\n    \n    @reactive.effect\n    def _():\n        if input.increment():\n            count.set(count() + 1)\n    \n    @output\n    @render.text\n    def count_text():\n        return f\"Count: {count()}\"\n\napp = App(app_ui, server)"
+  },
+  {
+    "objectID": "Shinylive.html#how-it-works",
+    "href": "Shinylive.html#how-it-works",
+    "title": "Shinylive App in Quarto",
+    "section": "How It Works",
+    "text": "How It Works\nThe Shinylive Quarto extension does the following:\n\nIt takes your Python Shiny app code\nCompiles it to WebAssembly with Pyodide\nRenders it directly in the browser\n\nThis means your readers can interact with the Shiny app without needing to install anything or connect to a Shiny server."
+  },
+  {
+    "objectID": "Shinylive.html#options",
+    "href": "Shinylive.html#options",
+    "title": "Shinylive App in Quarto",
+    "section": "Options",
+    "text": "Options\nYou can customize your Shinylive apps with various options:\n\nstandalone: true|false - Whether the app is standalone or shares the Python environment with other code chunks\ncomponents: [editor, viewer] - Which components to display\nlayout: vertical|horizontal - Whether to stack the editor and viewer vertically or horizontally\nviewerHeight: 400 - Height of the viewer in pixels"
+  },
+  {
+    "objectID": "Shinylive.html#deployment",
+    "href": "Shinylive.html#deployment",
+    "title": "Shinylive App in Quarto",
+    "section": "Deployment",
+    "text": "Deployment\nWhen you render your Quarto document, it will include all the necessary JavaScript and WebAssembly files to run your Shiny apps in the browser. You can deploy the rendered HTML document to any static web hosting service."
+  }
+]
